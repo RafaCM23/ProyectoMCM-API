@@ -7,15 +7,15 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 
 
 @SpringBootApplication
-public class P2PApi extends SpringBootServletInitializer{
+public class MCMApi extends SpringBootServletInitializer{
 
 	public static void main(String[] args) {
-		SpringApplication.run(P2PApi.class, args);
+		SpringApplication.run(MCMApi.class, args);
 	}
 	
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-	    return application.sources(P2PApi.class);
+	    return application.sources(MCMApi.class);
 
 	}
 	

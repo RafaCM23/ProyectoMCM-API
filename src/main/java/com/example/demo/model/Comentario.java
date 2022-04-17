@@ -1,16 +1,12 @@
 package com.example.demo.model;
 
 import java.util.Date;
+import java.util.Objects;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,18 +22,34 @@ public class Comentario {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
+	
+	private String autor;
 	
 	private String contenido;
-	@OneToOne(fetch=FetchType.EAGER)
-	@JsonProperty(access = Access.WRITE_ONLY)
-	private User autor;
 	
 	private Date fecha;
+	
+	private Boolean verificado;
+	
+	private int codigo;
 
-	public Comentario(String contenido) {
-		super();
-		this.contenido = contenido;
+	@Override
+	public int hashCode() {
+		return Objects.hash(autor, contenido, fecha);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Comentario other = (Comentario) obj;
+		return Objects.equals(autor, other.autor) && Objects.equals(contenido, other.contenido)
+				&& Objects.equals(fecha, other.fecha);
 	}
 	
 	
