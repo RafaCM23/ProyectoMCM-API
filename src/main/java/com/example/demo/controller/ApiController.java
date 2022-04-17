@@ -26,7 +26,7 @@ import com.example.demo.services.AgendaService;
 import com.example.demo.services.ComentarioService;
 
 
-@CrossOrigin(origins = "https://rafacm23.github.io/")
+@CrossOrigin(origins = "https://rafacm23.github.io")
 @RestController
 public class ApiController {
 	
