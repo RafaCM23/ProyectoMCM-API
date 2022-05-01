@@ -14,7 +14,7 @@ public class CorsConfig implements WebMvcConfigurer {
 	public WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurer() {
 			
-			String origen="http://localhost:4200";
+			String origen="https://rafacm23.github.io/ProyectoMCM/";
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				
