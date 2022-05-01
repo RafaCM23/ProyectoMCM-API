@@ -31,7 +31,7 @@ import com.example.demo.services.ComentarioService;
 import com.example.demo.services.ProfesionalService;
 
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "https://rafacm23.github.io")
 @RestController
 public class ApiController {
 
