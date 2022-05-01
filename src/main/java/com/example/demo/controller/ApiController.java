@@ -15,52 +15,97 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.Cita;
 import com.example.demo.model.Comentario;
 import com.example.demo.model.Dia;
 import com.example.demo.model.Mes;
+import com.example.demo.model.Profesional;
+import com.example.demo.model.User;
+import com.example.demo.repository.ProfesionalRepo;
 import com.example.demo.security.JWTUtil;
 import com.example.demo.services.AgendaService;
 import com.example.demo.services.ComentarioService;
+import com.example.demo.services.ProfesionalService;
 
 
-@CrossOrigin(origins = "https://rafacm23.github.io")
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 public class ApiController {
+
 	
-    @Autowired private JWTUtil jwtUtil;
-    @Autowired private AuthenticationManager authManager;
-    @Autowired private PasswordEncoder passwordEncoder;
 	
     @Autowired private ComentarioService comentarioService;
     @Autowired private AgendaService agendaService;
+    @Autowired private ProfesionalService profService;
     
     
-    /**
-     * Este metodo recibe un numero de un mes, y lo devuelve
-     * @param numero
-     * @return
-     */
-    @GetMapping("/mes/{numero}")
-    public ResponseEntity<Mes> getMes(@PathVariable int numero){
-    	//get enero del 2022 y todos los dias
-    	Mes mes=agendaService.getMes(2022,numero);//cambiar el 2022 por anio actual
-    	return ResponseEntity.ok(mes);
+    
+    @GetMapping("/profesional/{id}/agenda/anio/{anio}/mes/{mes}")
+    public ResponseEntity<?> getAgenda(@PathVariable int id,@PathVariable int anio,@PathVariable int mes){
+    	if(id==0 || anio==0 || mes==0) {return ResponseEntity.badRequest().body("Faltan datos");}
+    	Mes resp=agendaService.getAgenda(id,anio,mes);
+    	if(resp!=null) {return ResponseEntity.ok(resp);}
+    	else {return ResponseEntity.notFound().build();}
+    	
+    }
+    @PostMapping("/profesional/{id}/agenda/anio/{anio}/mes/{mes}")
+    public ResponseEntity<?> postCita(@PathVariable int id,@PathVariable int anio,@PathVariable int mes,
+    		@RequestBody Cita cita){
+    	if(id==0 || anio==0 || mes==0 || cita==null) {return ResponseEntity.badRequest().body("Faltan datos");}
+    	
+    
+    		String resp=agendaService.nuevaReserva(id,anio,mes,cita);
+    		return ResponseEntity.ok().build();
+    	
+    	
     }
     
-    /**
-     * Este metodo recibe una reserva y la envia al metodo nuevaReserva, si esta todo correcto se guarda
-     * @param cita
-     * @return ResponseEntity
-     */
-    @PostMapping("/reserva")
-    public ResponseEntity<?> reservarCita(@RequestBody Cita cita){
-    	agendaService.nuevaReserva(cita);
-    	return ResponseEntity.ok().build();
+    
+    @GetMapping("/profesional/{id}")
+    public ResponseEntity<?> getProfesional(@PathVariable Long id){
+    	Profesional prof=profService.getProfesional(id);
+    	if(prof==null) {
+    		return ResponseEntity.notFound().build();
+    	}
+    	else {
+    		return ResponseEntity.ok(prof);
+    	}
+    }
+    @PostMapping("/profesional")
+    public ResponseEntity<?> postProfesional(@RequestBody(required=false) Profesional prof){
+    	
+    	int resp=profService.newProfesional(prof);
+    	if(resp==-1) return ResponseEntity.badRequest().body("Faltan datos");
+    	else return ResponseEntity.ok(HttpStatus.CREATED);
     }
     
+    
+    @GetMapping("/profesionales")
+    public ResponseEntity<List<Profesional>> getProfesionalesSinConfirmar(@RequestParam(required=false) Boolean verificado){
+    	List<Profesional> profs= null;
+    	if(verificado==null || verificado==true) {profs=profService.getProfesionalesVerificados();}
+    	else {profs =profService.getProfesionalesSinVerificar();}
+    	
+    	if(profs==null) {
+    		return ResponseEntity.notFound().build();
+    		}
+    	else {
+    		return ResponseEntity.ok(profs);
+    		}
+    }
+    
+    
+    
+    @PostMapping("/correoOcupado")
+    public ResponseEntity<?> correOcupado(@RequestBody(required=false) String correo){
+    	
+    	if(correo==null) return ResponseEntity.badRequest().body("Falta correo");
+    	int respuesta=profService.correoOcupado(correo);
+    	return respuesta==0 ? ResponseEntity.notFound().build() : ResponseEntity.ok().build();
+    }
     
     
     
@@ -91,10 +136,30 @@ public class ApiController {
     
     //------------------------------------ Identificación ------------------------------------//
     
+    @GetMapping("/verifica/profesional/{id}")
+    	public ResponseEntity<?> verificaProf(@PathVariable(required=false) Long id){
+    	
+    	ResponseEntity<?> resp= profService.verificaProf(id);
+    	return resp;
+    }
+    @GetMapping("/rechaza/profesional/{id}")
+	public ResponseEntity<?> rechazaProf(@PathVariable(required=false) Long id){
+	
+	ResponseEntity<?> resp= profService.rechazaProf(id);
+	return resp;
+}
+    
+    @PostMapping("/auth/login")
+    	public ResponseEntity<?> login(@RequestBody(required=false) Profesional prof){
+    	
+    	ResponseEntity<?> resp=profService.login(prof);
+    	return resp;
+    	
+    }
 
 //	@PostMapping("/auth/register")
 //    public ResponseEntity<?> register(@RequestBody(required=false) User user){
-//		if(user==null||user.getName()==null||user.getNickname()==null||user.getEmail()==null|| user.getPassword()==null || user.getProvincia()==null) {
+//		if() {
 //			return ResponseEntity.badRequest().body("Faltan datos");
 //		}
 //    	User buscado =userRepo.findByEmail(user.getEmail()).orElse(null);
@@ -114,7 +179,7 @@ public class ApiController {
 	
 //
 //    @PostMapping("/auth/login")
-//    public ResponseEntity<?> login(@RequestBody(required=false) LoginCredentials body){
+//    public ResponseEntity<?> login(@RequestBody(required=false) Profesional prof){
 //    	
 //    	if(body==null || body.getEmail()==null || body.getPassword()==null) {
 //    		return ResponseEntity.badRequest().body("Faltan datos");

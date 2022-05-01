@@ -28,6 +28,11 @@ public class Dia {
 		this.citasConfirmadas=new ArrayList<Cita>();
 		this.citasSinConfirmar=new ArrayList<Cita>();
 	}
+	public Dia(int numero) {
+		this.citasConfirmadas=new ArrayList<Cita>();
+		this.citasSinConfirmar=new ArrayList<Cita>();
+		this.numero=numero;
+	}
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

@@ -14,7 +14,7 @@ public class CorsConfig implements WebMvcConfigurer {
 	public WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurer() {
 			
-			String origen="https://rafacm23.github.io";
+			String origen="http://localhost:4200";
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				
@@ -26,7 +26,27 @@ public class CorsConfig implements WebMvcConfigurer {
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
 				
+				registry.addMapping("/verifica")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/rechaza")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/profesionales")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/profesional")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
 				registry.addMapping("/mes/")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/correoOcupado")
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
 				
@@ -38,6 +58,8 @@ public class CorsConfig implements WebMvcConfigurer {
 				registry.addMapping("/auth/register")
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
+				
+				
 			
 
 			}

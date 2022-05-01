@@ -1,7 +1,9 @@
 package com.example.demo.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -20,7 +22,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
 public class Agenda {
 
 	@Id
@@ -29,5 +30,27 @@ public class Agenda {
 	
 	@OneToMany(fetch=FetchType.LAZY)
 	private List<Anio> anios;
+	
+	public Agenda() {
+		this.anios=new ArrayList<Anio>();
+	}
+	
+	public void creaAnio(int year) {
+		this.anios.add(new Anio(year));
+	}
+	public void addAnio(Anio anio) {
+		this.anios.add(anio);
+	}
+	
+	
+	
+	public Anio getAnio(int year) {
+		for (Anio anio : anios) {
+			if(anio.getNumero()==year) {
+				return anio;
+			}
+		}
+		return null;
+	}
 	
 }

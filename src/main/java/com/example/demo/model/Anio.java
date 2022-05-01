@@ -26,13 +26,17 @@ public class Anio {
 	public Anio () {
 		this.meses=new ArrayList<Mes>();
 	}
+	public Anio (int numero) {
+		this.meses=new ArrayList<Mes>();
+		this.numero=numero;
+	}
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
 	private int numero;
-	@OneToMany(fetch=FetchType.LAZY,cascade = CascadeType.PERSIST)
+	@OneToMany(fetch=FetchType.LAZY)
 	private List<Mes> meses;
 	
 	public void addMes(Mes mes) {
