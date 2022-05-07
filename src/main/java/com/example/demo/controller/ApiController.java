@@ -1,31 +1,28 @@
 package com.example.demo.controller;
 
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.Cita;
 import com.example.demo.model.Comentario;
-import com.example.demo.model.Dia;
+
 import com.example.demo.model.Mes;
 import com.example.demo.model.Profesional;
-import com.example.demo.model.User;
-import com.example.demo.repository.ProfesionalRepo;
-import com.example.demo.security.JWTUtil;
 import com.example.demo.services.AgendaService;
 import com.example.demo.services.ComentarioService;
 import com.example.demo.services.ProfesionalService;
@@ -56,13 +53,57 @@ public class ApiController {
     		@RequestBody Cita cita){
     	if(id==0 || anio==0 || mes==0 || cita==null) {return ResponseEntity.badRequest().body("Faltan datos");}
     	
-    
     		String resp=agendaService.nuevaReserva(id,anio,mes,cita);
     		return ResponseEntity.ok().build();
-    	
-    	
     }
     
+    @GetMapping("/ocupado/profesional/{id}/agenda/anio/{anio}/mes/{mes}/dia/{dia}")
+    public ResponseEntity<?> ocupaDia(@PathVariable Long id,@PathVariable int anio,@PathVariable int mes,@PathVariable int dia){
+    	String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	if(id==0 || anio==0 || mes==0 || dia==0) {return ResponseEntity.badRequest().body("Faltan datos");}
+    	Profesional p = profService.getDatos(email);
+    		ResponseEntity<?> resp = agendaService.ocupaDia(id,anio,mes,dia,p);
+    		return resp;
+    }
+
+    @GetMapping("/vacaciones/profesional/{id}/agenda/anio/{anio}/mes/{mes}/dia/{dia}")
+    public ResponseEntity<?> vacacionesDia(@PathVariable Long id,@PathVariable int anio,@PathVariable int mes,@PathVariable int dia){
+    	String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	if(id==0 || anio==0 || mes==0 || dia==0) {return ResponseEntity.badRequest().body("Faltan datos");}
+    	Profesional p = profService.getDatos(email);
+    		ResponseEntity<?> resp = agendaService.vacacionesDia(id,anio,mes,dia,p);
+    		return resp;
+    }
+    
+    
+    @GetMapping("/mifoto")
+    public ResponseEntity<?> getFoto(){
+    	String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	String resp=profService.getImg(email);
+    	if(email.isEmpty()  || resp==null) {return ResponseEntity.notFound().build();}
+    	else{  		
+    		return ResponseEntity.ok('"'+resp+'"');
+    				}
+    }
+    
+    @GetMapping("/misdatos")
+    public ResponseEntity<?> getDatos(){
+    	String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	Profesional resp=profService.getDatos(email);
+    	if(email.isEmpty()  || resp==null) {return ResponseEntity.notFound().build();}
+    	else{  		
+    		return ResponseEntity.ok(resp);
+    				}
+    }
+    
+   
+    @PutMapping("/profesional/{id}")
+    public ResponseEntity<?> postDatos(@RequestBody(required=false) Profesional prof,@RequestParam(required=false) Long id){
+    	String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	Profesional resp=profService.getDatos(prof.getEmail());
+    	if(!email.equals(prof.getEmail()) && !email.equals("administrador")) {return ResponseEntity.badRequest().body("No puede cambiar los datos de otro");}
+    	return profService.putDatos(prof,resp);
+    }
     
     @GetMapping("/profesional/{id}")
     public ResponseEntity<?> getProfesional(@PathVariable Long id){
@@ -74,6 +115,8 @@ public class ApiController {
     		return ResponseEntity.ok(prof);
     	}
     }
+    
+    
     @PostMapping("/profesional")
     public ResponseEntity<?> postProfesional(@RequestBody(required=false) Profesional prof){
     	
@@ -128,19 +171,49 @@ public class ApiController {
     	}
     }
     
+    //------------------------------------ Admin ------------------------------------//
     
+    @GetMapping("/isAdmin")
+    public ResponseEntity<?> isAdmin() {
+    	String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	if(email.isEmpty() || email==null || !email.equals("administrador")) {
+    		return ResponseEntity.ok(false);
+    	}
+    	else {
+    		return ResponseEntity.ok(true);
+    	}
+    }
     
-    
+    @GetMapping("/allprofesionales")
+    public ResponseEntity<?> getAllProfesionales(){
+    	String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	if(!email.equals("administrador") || email.isEmpty()) {return ResponseEntity.badRequest().body("Debe ser admin");}
+    	List<Profesional> profs= profService.getProfesionales();    	
+    	if(profs==null) {
+    		return ResponseEntity.notFound().build();
+    		}
+    	else {
+    		return ResponseEntity.ok(profs);
+    		}
+    }
     
     
     
     //------------------------------------ Identificación ------------------------------------//
     
+    @GetMapping("/whois")
+    public ResponseEntity<?> whoIs(){
+    	String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	Profesional resp= profService.getDatos(email);
+    	if(resp==null) {return ResponseEntity.notFound().build();}
+    	else {return ResponseEntity.ok(resp.getId());}
+    }
+    
     @GetMapping("/verifica/profesional/{id}")
-    	public ResponseEntity<?> verificaProf(@PathVariable(required=false) Long id){
-    	
-    	ResponseEntity<?> resp= profService.verificaProf(id);
-    	return resp;
+	public ResponseEntity<?> verificaProf(@PathVariable(required=false) Long id){
+	
+	ResponseEntity<?> resp= profService.verificaProf(id);
+	return resp;
     }
     @GetMapping("/rechaza/profesional/{id}")
 	public ResponseEntity<?> rechazaProf(@PathVariable(required=false) Long id){
@@ -157,59 +230,7 @@ public class ApiController {
     	
     }
 
-//	@PostMapping("/auth/register")
-//    public ResponseEntity<?> register(@RequestBody(required=false) User user){
-//		if() {
-//			return ResponseEntity.badRequest().body("Faltan datos");
-//		}
-//    	User buscado =userRepo.findByEmail(user.getEmail()).orElse(null);
-//    	User buscado2 = userRepo.findByNickname(user.getNickname()).orElse(null);
-//		if(buscado==null && buscado2==null) {
-//        String encodedPass = passwordEncoder.encode(user.getPassword());
-//        user.setPassword(encodedPass);
-//        user = userRepo.save(user);
-//        String token = jwtUtil.generateToken(user.getEmail());
-//        return 
-//        		ResponseEntity.ok(Collections.singletonMap("jwt-token", token));
-//		}
-//		else {
-//			return ResponseEntity.badRequest().body("Usuario en uso");
-//		}
-//    }
-	
-//
-//    @PostMapping("/auth/login")
-//    public ResponseEntity<?> login(@RequestBody(required=false) Profesional prof){
-//    	
-//    	if(body==null || body.getEmail()==null || body.getPassword()==null) {
-//    		return ResponseEntity.badRequest().body("Faltan datos");
-//    	}
-//    	User buscado =userRepo.findByEmail(body.getEmail()).orElse(null);
-//    	if(buscado==null) {
-//    		
-//    		return ResponseEntity.badRequest().body("Bad Mail");
-//    	}
-//    	//estoNoFunciona
-//    	if(!passwordEncoder.matches(body.getPassword(), buscado.getPassword())) {
-//    	
-//    		return ResponseEntity.badRequest().body("Bad Password");
-//    	}
-//        try {
-//            UsernamePasswordAuthenticationToken authInputToken =
-//            new UsernamePasswordAuthenticationToken(body.getEmail(), body.getPassword());
-//            
-//            
-//            authManager.authenticate(authInputToken);
-//
-//            String token = jwtUtil.generateToken(buscado.getEmail());
-//
-//            
-//            return ResponseEntity.ok(Collections.singletonMap("jwt-token", token));
-//        }catch (AuthenticationException authExc){
-//            return ResponseEntity.badRequest().body("Error al procesar login");
-//        }
-//    }
-    
+   
 
 	
 }

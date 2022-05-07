@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Agenda;
@@ -67,11 +68,58 @@ public class AgendaService {
 		ag.addAnio(year);
 	
 		return "Success";
-		
-		
-		
 	}
 	
+	public ResponseEntity<?> ocupaDia(Long id, int anio, int mes, int dia,Profesional p){
+		Profesional prof=profRepo.findById(id).orElse(null);
+		if(p==null || (!p.getEmail().equals("administrador") && prof.getId()!=p.getId())|| prof==null ) {
+			return ResponseEntity.badRequest().body("Datos Erroneos");
+		}
+		else {
+			Mes month=prof.getAgenda().getAnio(anio).getMes(mes);
+			Dia day= month.getDia(dia);
+			if(day==null) {
+				Dia nuevo = new Dia(dia);
+				nuevo.setOcupado(true);
+				month.addDia(nuevo);
+				diaRepo.save(nuevo);
+				mesRepo.save(month);
+				}
+			else {
+				day.setOcupado(true);
+				diaRepo.save(day);
+				mesRepo.save(month);
+			}
+			
+			return ResponseEntity.ok().build();
+		}
+	}
+	
+	public ResponseEntity<?> vacacionesDia(Long id, int anio, int mes, int dia,Profesional p){
+		Profesional prof=profRepo.findById(id).orElse(null);
+		if(p==null || (!p.getEmail().equals("administrador") && prof.getId()!=p.getId())|| prof==null ) {
+			return ResponseEntity.badRequest().body("Datos Erroneos");
+		}
+		else {
+			System.out.println(prof.getAgenda());
+			Mes month=prof.getAgenda().getAnio(anio).getMes(mes);
+			Dia day= month.getDia(dia);
+			if(day==null) {
+				Dia nuevo = new Dia(dia);
+				nuevo.setVacaciones(true);
+				month.addDia(nuevo);
+				diaRepo.save(nuevo);
+				mesRepo.save(month);
+				}
+			else {
+				day.setVacaciones(true);
+				diaRepo.save(day);
+				mesRepo.save(month);
+			}
+			System.out.println(day);
+			return ResponseEntity.ok().build();
+		}
+	}
 	public Anio buscaAnio(Date fecha){
 		int anio = fecha.getYear()+1900; 	
 		return anioRepo.findByNumero(anio).orElse(null);

@@ -19,6 +19,12 @@ public interface ProfesionalRepo extends JpaRepository<Profesional,Long>{
 	//Método para obtener un Profesional por nombre
 	public Optional<Profesional> findByNombre(String nombre);
 	
+	
+	@Query(
+			  value = "SELECT * FROM profesional p WHERE p.email!='administrador'", 
+			  nativeQuery = true)
+			Collection<Profesional> findAllNonAdmin();
+	
 	@Query(
 	  value = "SELECT * FROM profesional p WHERE p.verificado=0", 
 	  nativeQuery = true)

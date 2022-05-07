@@ -11,23 +11,25 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
+import com.example.demo.model.Profesional;
 import com.example.demo.model.User;
+import com.example.demo.repository.ProfesionalRepo;
 import com.example.demo.repository.UserRepo;
 
 @Component
 public class MyUserDetailsService implements UserDetailsService {
 
-    @Autowired private UserRepo userRepo;
+	@Autowired ProfesionalRepo profRepo;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User userRes = userRepo.findByEmail(email).orElse(null);
-        if(userRes==null)
+        Profesional p = profRepo.findByEmail(email).orElse(null);
+        if(p==null)
             throw new UsernameNotFoundException("Could not findUser with email = " + email);
       
         return new org.springframework.security.core.userdetails.User(
                 email,
-                userRes.getPassword(),
+                p.getContrasenia(),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
     }
 }

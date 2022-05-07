@@ -30,6 +30,27 @@ public class CorsConfig implements WebMvcConfigurer {
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
 				
+				registry.addMapping("/vacaciones")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/ocupado")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				
+				registry.addMapping("/isAdmin")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/mifoto")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/misdatos")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
 				registry.addMapping("/rechaza")
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
@@ -38,7 +59,15 @@ public class CorsConfig implements WebMvcConfigurer {
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
 				
+				registry.addMapping("/allprofesionales")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
 				registry.addMapping("/profesional")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/whois")
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
 				
@@ -58,6 +87,7 @@ public class CorsConfig implements WebMvcConfigurer {
 				registry.addMapping("/auth/register")
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
+				
 				
 				
 			

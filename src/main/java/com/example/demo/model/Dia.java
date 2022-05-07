@@ -45,6 +45,7 @@ public class Dia {
 	private List<Cita> citasConfirmadas;
 	
 	private Boolean vacaciones;
+	private Boolean ocupado;
 
 	
 	public void addCitaSinConfirmar(Cita cita) {
