@@ -96,6 +96,7 @@ public class ProfesionalService {
 			if(buscado==null) {	resp=ResponseEntity.badRequest().body("Email Incorrecto");}
 			else {
 				if(!passwordEncoder.matches(prof.getContrasenia(), buscado.getContrasenia())) {
+					System.out.println(prof.getContrasenia()+ " "+buscado.getContrasenia());
 					resp=ResponseEntity.badRequest().body("Contraseña Incorrecta");}	
 				else {
 					
