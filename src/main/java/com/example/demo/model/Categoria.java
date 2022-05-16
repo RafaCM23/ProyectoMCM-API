@@ -1,13 +1,9 @@
 package com.example.demo.model;
 
-import java.util.Date;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 
 
 import lombok.Getter;
@@ -20,16 +16,17 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-public class Cita {
+public class Categoria {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@OneToOne(cascade = CascadeType.ALL)
-	private Persona persona;
-	private String motivo;
-	private Date fecha;
-	private Boolean presencial;
-	private int hora;
-	private Long profId;
+	private String nombre;
+	
+	public Categoria(String nombre) {
+		super();
+		this.nombre = nombre;
+	}
+	
+	
 }
 

@@ -1,15 +1,21 @@
 package com.example.demo.services;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.model.Agenda;
 import com.example.demo.model.Profesional;
@@ -27,8 +33,68 @@ public class ProfesionalService {
 	
     @Autowired private JWTUtil jwtUtil;
 	@Autowired private PasswordEncoder passwordEncoder;
-    @Autowired private AuthenticationManager authManager;
 	
+    
+    
+    public ResponseEntity<?> setImagen(Long id,String email,MultipartFile imagen){
+    	if(imagen.isEmpty() || imagen==null) {
+    		return ResponseEntity.badRequest().body("Falta imagen");
+    	}
+		Profesional buscado = profRepo.findById(id).orElse(null);
+		Profesional who = profRepo.findByEmail(email).orElse(null);
+    	if(!who.getEmail().equals("administrador") && who.getId()!=buscado.getId()) {return ResponseEntity.badRequest().body("Falta permisos");}
+    	else {
+    		Path directorioImagenes = Paths.get("src//main//resources//static/images");
+    		String rutaAbsoluta = directorioImagenes.toFile().getAbsolutePath();
+    		ResponseEntity<?>resp;
+    		try {
+				byte[] bytesImg = imagen.getBytes();
+				Path rutaCompleta = Paths.get(rutaAbsoluta+"//"+imagen.getOriginalFilename());
+				Files.write(rutaCompleta, bytesImg);
+
+		    	if(buscado!=null) {
+		    		buscado.setImg(imagen.getOriginalFilename());
+		    		profRepo.save(buscado);
+		    		resp= ResponseEntity.ok(HttpStatus.CREATED);
+		    	}
+		    	else {
+		    		resp= ResponseEntity.notFound().build();
+		    	}
+				
+			} catch (Exception e) {
+				System.out.println(e);
+				resp=ResponseEntity.badRequest().body("Error al procesar la imagen");
+				
+			}
+    	return resp;
+    }
+    	
+    }
+    
+    
+    public Resource getImgProf(Long id) {
+		Profesional p= profRepo.findById(id).orElse(null);
+		Resource res=null;
+		if(p!=null) {		
+			if(p.getImg()==null) {}
+			else {
+				Path directorioImagenes = Paths.get("src//main//resources//static/images");
+	    		String rutaAbsoluta = directorioImagenes.toFile().getAbsolutePath();
+				Path rutaCompleta = Paths.get(rutaAbsoluta+"//"+p.getImg());
+				try {				
+					Resource resource = new UrlResource(rutaCompleta.toUri());
+					res= resource;
+					} catch (IOException e) {
+					res= null;
+					}
+				
+				}
+				
+				return res;
+		}
+		return res;
+	}
+    
     
     public int correoOcupado(String correo) {
     	Profesional buscado = profRepo.findByEmail(correo).orElse(null);
@@ -96,7 +162,6 @@ public class ProfesionalService {
 			if(buscado==null) {	resp=ResponseEntity.badRequest().body("Email Incorrecto");}
 			else {
 				if(!passwordEncoder.matches(prof.getContrasenia(), buscado.getContrasenia())) {
-					System.out.println(prof.getContrasenia()+ " "+buscado.getContrasenia());
 					resp=ResponseEntity.badRequest().body("Contraseña Incorrecta");}	
 				else {
 					
@@ -149,12 +214,7 @@ public class ProfesionalService {
 			return ResponseEntity.noContent().build();}
 	}
 	
-	public String getImg(String email) {
-		Profesional p= profRepo.findByEmail(email).orElse(null);
-		if(p==null || p.getImg()==null || p.getImg().isEmpty() || p.getImg().equals("")) {
-			return null;
-		}else {return p.getImg();}
-	}
+	
 	
 	public Profesional getDatos(String email) {
 		return profRepo.findByEmail(email).orElse(null);
@@ -193,9 +253,8 @@ public class ProfesionalService {
 		agendaRepo.save(new Agenda());
 		marta.setEspecialidad("Nutrición Materno-Infantil"); marta.setDescripcion("Además de interesarme la Nutrición infantil tengo experiencia en consultas tanto para personas\n"
 				+ "                que quieren disminuir su peso y mejorar su relación con la comida, como para intolerantes a la fructosa, lactosa o gluten");
-		marta.setImg("./assets/imagenes/Marta.jpeg");
-		ej1.setEspecialidad("Ej1 Especialidad"); ej1.setDescripcion("Ej1 Descripcion");ej1.setImg("./assets/imagenes/usuario.png");
-		ej2.setEspecialidad("Ej2 Especialidad"); ej2.setDescripcion("Ej2 Descripcion");ej2.setImg("./assets/imagenes/usuario.png");
+		ej1.setEspecialidad("Ej1 Especialidad"); ej1.setDescripcion("Ej1 Descripcion");
+		ej2.setEspecialidad("Ej2 Especialidad"); ej2.setDescripcion("Ej2 Descripcion");
 		marta.setVerificado(true);admin.setVerificado(true);
 		profRepo.save(marta);profRepo.save(ej1);profRepo.save(ej2);profRepo.save(admin);
 	}

@@ -18,6 +18,31 @@ public class CorsConfig implements WebMvcConfigurer {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				
+				registry.addMapping("/acepta/cita/")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/rechaza/cita/")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/citasProximas")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				
+				registry.addMapping("/post")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/posts")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/allPosts")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
 				registry.addMapping("/comentario")
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
@@ -38,8 +63,19 @@ public class CorsConfig implements WebMvcConfigurer {
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
 				
+				registry.addMapping("/categorias")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/categoria")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
 				
 				registry.addMapping("/isAdmin")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/subirImagen")
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
 				
@@ -87,7 +123,6 @@ public class CorsConfig implements WebMvcConfigurer {
 				registry.addMapping("/auth/register")
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
-				
 				
 				
 			

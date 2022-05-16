@@ -1,6 +1,5 @@
 package com.example.demo.model;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -37,7 +36,6 @@ public class Profesional {
 	private Agenda agenda;
 	
 	private Boolean verificado;
-	
 	private String img;
 	private String especialidad;
 	private String descripcion;

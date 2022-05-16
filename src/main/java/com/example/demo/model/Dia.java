@@ -59,5 +59,14 @@ public class Dia {
 		}
 	}
 	
+	public void rechazaCita(Cita cita) {
+		if(this.citasSinConfirmar.contains(cita)){
+			this.citasSinConfirmar.remove(cita);
+		}else if(this.citasConfirmadas.contains(cita)) {
+			this.citasConfirmadas.remove(cita);
+		}
+	}
+	
+	
 	
 }
