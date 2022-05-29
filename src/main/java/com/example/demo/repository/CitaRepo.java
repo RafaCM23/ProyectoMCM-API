@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -34,6 +35,9 @@ public interface CitaRepo extends JpaRepository<Cita,Long>{
 	//Esta query pregunta por las citas que esten en las proximas dos semanas despues del dia actual
 	//Y esten confirmadas
 	
+	
+	//Método para obtener una Cita por Hash para cancelar
+	public Optional<Cita> findByCancelar(int hash);
 	
 	
 	

@@ -9,6 +9,8 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Component
@@ -16,12 +18,16 @@ public class JWTUtil {
 
     @Value("${jwt_secret}")
     private String secret;
-
+    
+    final Instant now = Instant.now();
+    
     public String generateToken(String email) throws IllegalArgumentException, JWTCreationException {
+    	
         return JWT.create()
                 .withSubject("Profesional")
                 .withClaim("email", email)
-                .withIssuedAt(new Date())
+                .withIssuedAt(Date.from(now))
+                .withExpiresAt(Date.from(now.plus(1, ChronoUnit.HOURS)))//Caducidad = 30 min
                 .withIssuer("MCM")
                 .sign(Algorithm.HMAC256(secret));
     }

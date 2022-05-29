@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,12 +25,16 @@ public class Cita {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne(cascade = CascadeType.MERGE)
+	//@JsonIgnore
 	private Persona persona;
 	private String motivo;
 	private Date fecha;
 	private Boolean presencial;
 	private int hora;
 	private Long profId;
+	@JsonIgnore
+	private int cancelar;
+	
 }
 

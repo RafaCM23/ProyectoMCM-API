@@ -26,13 +26,13 @@ public interface ProfesionalRepo extends JpaRepository<Profesional,Long>{
 			Collection<Profesional> findAllNonAdmin();
 	
 	@Query(
-	  value = "SELECT * FROM profesional p WHERE p.verificado=0", 
-	  nativeQuery = true)
-	Collection<Profesional> findAllNonVerified();
+			  value = "SELECT * FROM profesional p WHERE p.verificado=0", 
+			  nativeQuery = true)
+			Collection<Profesional> findAllNonVerified();
 	
 	@Query(
 			  value = "SELECT * FROM profesional p WHERE p.verificado=1 AND p.email!='administrador'", 
 			  nativeQuery = true)
-	Collection<Profesional> findAllVerified();
+			Collection<Profesional> findAllVerified();
 
 }

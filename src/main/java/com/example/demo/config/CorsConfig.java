@@ -22,6 +22,19 @@ public class CorsConfig implements WebMvcConfigurer {
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
 				
+				registry.addMapping("/cancelar/cita")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/blogPreview")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				registry.addMapping("/postRelacionados/")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
+				
 				registry.addMapping("/rechaza/cita/")
 				.allowedOrigins(origen)
 				.allowedHeaders("*");

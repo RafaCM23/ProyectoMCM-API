@@ -13,6 +13,7 @@ import com.example.demo.model.Anio;
 import com.example.demo.model.Cita;
 import com.example.demo.model.Dia;
 import com.example.demo.model.Mes;
+import com.example.demo.model.Persona;
 import com.example.demo.model.Profesional;
 import com.example.demo.repository.AgendaRepo;
 import com.example.demo.repository.AnioRepo;
@@ -33,6 +34,8 @@ public class AgendaService {
 	@Autowired ProfesionalRepo profRepo;
 	@Autowired PersonaRepo personaRepo;
 	
+	@Autowired private CorreoService correoService;
+	
 	@Autowired ProfesionalService profService;
 	/**
 	 * Este metodo recibe una cita, comprueba que el anio, mes y dia existen, si no es asi lo crea.
@@ -45,7 +48,6 @@ public class AgendaService {
 			return "Faltan datos";
 		}
 		Profesional prof = profRepo.findById(Long.valueOf(idProf)).orElse(null);
-		System.out.println(cita.getPersona());
 		if(prof==null) {return "Profesional no encontrado";}	Agenda ag=prof.getAgenda();
 		if(ag==null) {return "Agenda no encontrada";}			Anio year = ag.getAnio(anio);
 		if(year==null) {ag.creaAnio(anio);}						Mes month = year.getMes(mes);
@@ -53,10 +55,21 @@ public class AgendaService {
 		if(day==null) {day= new Dia(cita.getFecha().getDate());}
 		
 		cita.setProfId(prof.getId());
-		day.addCitaSinConfirmar(cita);
+		cita.setCancelar(cita.hashCode());
 
+		day.addCitaSinConfirmar(cita);
+		
+		Persona nueva = cita.getPersona();
+		Persona buscada = personaRepo.findByEmail(nueva.getEmail()).orElse(null);
+		if(buscada!=null && buscada.getNombre().equals(nueva.getNombre()) && buscada.getTlfn().equals(nueva.getTlfn())) {
+			nueva.setId(buscada.getId());
+		}
+		else {
+			personaRepo.save(nueva);
+		}
+		cita.setPersona(nueva);
 		citaRepo.save(cita);
-		personaRepo.save(cita.getPersona());
+
 		diaRepo.save(day);
 		if(!month.getDias().contains(day)) {
 			month.addDia(day);
@@ -68,7 +81,7 @@ public class AgendaService {
 		anioRepo.save(year);
 		
 		ag.addAnio(year);
-	
+		correoService.sendMail(1, cita, 0);
 		return "Success";
 	}
 	
@@ -92,7 +105,6 @@ public class AgendaService {
 				diaRepo.save(day);
 				mesRepo.save(month);
 			}
-			
 			return ResponseEntity.ok().build();
 		}
 	}
@@ -116,8 +128,16 @@ public class AgendaService {
 				day.setVacaciones(true);
 				diaRepo.save(day);
 				mesRepo.save(month);
+				for (Cita c: day.getCitasConfirmadas()) {
+					correoService.sendMail(3, c, 3);
+					citaRepo.delete(c);
+				}
+				for (Cita c : day.getCitasSinConfirmar()) {
+					correoService.sendMail(3, c, 3);
+					citaRepo.delete(c);
+				}
 			}
-			System.out.println(day);
+			
 			return ResponseEntity.ok().build();
 		}
 	}
@@ -203,45 +223,58 @@ public class AgendaService {
 		if(id==null) {return ResponseEntity.badRequest().body("Faltan datos");}
 		Cita cita=citaRepo.findById(id).orElse(null);
 		Profesional prof= profRepo.findByEmail(email).orElse(null);
-		if(prof==null || prof.getId()!= cita.getProfId()) {return ResponseEntity.badRequest().body("Faltan permisos");}
+		if(prof==null || (prof.getId()!= cita.getProfId() && !prof.getEmail().equals("administrador")) ) {return ResponseEntity.badRequest().body("Faltan permisos");}
 		else {
 
-			String y=cita.getFecha().toString().substring(0,4);
-			String m=cita.getFecha().toString().substring(5,7);
-			String d=cita.getFecha().toString().substring(8,10);
-			Dia day=buscaDia(cita.getProfId(),Integer.valueOf(y),Integer.valueOf(m)-1,Integer.valueOf(d));
+			Dia day=buscaDia(cita.getProfId(),cita);
 			day.confirmarCita(cita);
+			correoService.sendMail(2, cita, 0);
 			diaRepo.save(day);
 			return ResponseEntity.ok().build();
 		}
 		
 	}
 	
-	public ResponseEntity<?> rechazaCita(Long id,String email){
+	public ResponseEntity<?> rechazaCita(Long id,String email,int motivo){
 		if(id==null) {return ResponseEntity.badRequest().body("Faltan datos");}
 		Cita cita=citaRepo.findById(id).orElse(null);
 		Profesional prof= profRepo.findByEmail(email).orElse(null);
-		if(prof==null || prof.getId()!= cita.getProfId()) {return ResponseEntity.badRequest().body("Faltan permisos");}
+		if(prof==null || (prof.getId()!= cita.getProfId() && !prof.getEmail().equals("administrador"))) {return ResponseEntity.badRequest().body("Faltan permisos");}
 		else {
 
-			String y=cita.getFecha().toString().substring(0,4);
-			String m=cita.getFecha().toString().substring(5,7);
-			String d=cita.getFecha().toString().substring(8,10);
-			Dia day=buscaDia(cita.getProfId(),Integer.valueOf(y),Integer.valueOf(m)-1,Integer.valueOf(d));
+			Dia day=buscaDia(cita.getProfId(),cita);
 			day.rechazaCita(cita);
 			diaRepo.save(day);
 			citaRepo.delete(cita);
+			correoService.sendMail(3, cita, motivo);
 			return ResponseEntity.ok().build();
 		}
 	}
 	
+	public ResponseEntity<?> cancelarCita(int hash){
+		Cita cita = citaRepo.findByCancelar(hash).orElse(null);
+		if(cita==null) {return ResponseEntity.notFound().build();}
+		else {
+			
+			Dia day=buscaDia(cita.getProfId(),cita);
+			day.rechazaCita(cita);
+			diaRepo.save(day);
+			correoService.sendMail(3, cita, 4);
+			citaRepo.delete(cita);
+			return ResponseEntity.noContent().build();
+		}
+	}
 	
-	public Dia buscaDia(Long idProf,int anio, int mes, int dia) {
+	
+	public Dia buscaDia(Long idProf,Cita c) {
+		String y=c.getFecha().toString().substring(0,4);
+		String m=c.getFecha().toString().substring(5,7);
+		String d=c.getFecha().toString().substring(8,10);
 		Profesional p = profRepo.findById(idProf).orElse(null); if(p==null) {return null;}
-		Anio y= p.getAgenda().getAnio(anio);	
-		Mes m= y.getMes(mes);
-		Dia d = m.getDia(dia);
-		return d;
+		Anio year= p.getAgenda().getAnio(Integer.parseInt(y));	
+		Mes mes= year.getMes(Integer.parseInt(m)-1);
+		Dia day = mes.getDia(Integer.parseInt(d));
+		return day;
 	}
 	
 

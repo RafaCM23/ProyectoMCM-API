@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,6 @@ public class BlogService {
 		    	}
 				
 			} catch (Exception e) {
-				System.out.println(e);
 				resp=ResponseEntity.badRequest().body("Error al procesar la imagen");
 				
 			}
@@ -96,7 +96,7 @@ public class BlogService {
 		return res;
 	}
 
-	public ResponseEntity<?> getNextPosts(int pagina){
+	public ResponseEntity<?> getNextPosts(Integer pagina){
 		int cuantos = pagina;
 
 		List<Post> resp= (List<Post>) postRepo.findNext8(cuantos);
@@ -153,11 +153,10 @@ public class BlogService {
 		Profesional prof = profRepo.findByEmail(emailProf).orElse(null);
 		if(prof==null) {return ResponseEntity.notFound().build();}
 		else {
-			
 			Post nuevo = new Post(prof, p.getNombre(), p.getContenido());
 			Post buscado = postRepo.findByNombre(nuevo.getNombre()).orElse(null);
 			if(buscado!=null) {return ResponseEntity.badRequest().body("Ya existe un post con ese nombre");}
-			if(p.getCategorias()!=null) {nuevo.setCategorias(p.getCategorias());}
+			if(p.getCategoria()!=null) {nuevo.setCategoria(p.getCategoria());}
 			p.setAutor(prof);p.setFecha(new Date());
 			postRepo.save(nuevo);
 			Post recienCreado = postRepo.findByNombre(nuevo.getNombre()).orElse(null);
@@ -181,15 +180,35 @@ public class BlogService {
 	}
 	
 	
-	public ResponseEntity<?> recuperaCategorias(String emailProf){
-		Profesional p = profRepo.findByEmail(emailProf).orElse(null);
-		if(p==null) {return ResponseEntity.notFound().build();}
+	public ResponseEntity<?> recuperaCategorias(){
 		
-		else {
 			List<Categoria> todas = catRepo.findAll();
+			if(todas.isEmpty()){
+				return ResponseEntity.notFound().build();
+			}		
 			return ResponseEntity.ok(todas);
+		
 		}
-	}
+	
+	public ResponseEntity<?> getRelacionados(Long idCat){
+		
+		List<Post> todos = (List<Post>) postRepo.findRelacionados(idCat);
+		if(todos.isEmpty()){
+			return ResponseEntity.notFound().build();
+		}		
+		return ResponseEntity.ok(todos);
+	
+		}
+	
+	public ResponseEntity<?> getBlogPreview(){
+		
+		List<Post> todos = (List<Post>) postRepo.findPreview();
+		if(todos.isEmpty()){
+			return ResponseEntity.notFound().build();
+		}		
+		return ResponseEntity.ok(todos);
+	
+		}
 	
 	public ResponseEntity<?> creaComentario(Long id,ComentarioPost comentario){
 		
@@ -198,7 +217,13 @@ public class BlogService {
 		if(comentario==null ||comentario.getAutor()==null || comentario.getContenido()==null) {
 			return ResponseEntity.badRequest().body("Faltan Datos");
 		}
+		
 		else {
+			for (ComentarioPost c : p.getComentarios()) {
+				if(c.getAutor().equals(comentario.getAutor())) {
+					return ResponseEntity.badRequest().body("No puede publicar más comentarios en este post");
+				}
+			}
 			ComentarioPost nuevo = new ComentarioPost(comentario.getAutor(),comentario.getContenido(),new Date());
 			p.addComentario(nuevo);
 			comentarioPostRepo.save(nuevo);
@@ -237,19 +262,48 @@ public class BlogService {
 		Profesional prof = profRepo.findByEmail(email).orElse(null); 
 		if(prof==null || !prof.getEmail().equals("administrador")) {return ResponseEntity.badRequest().body("Faltan Permisos");}
 		Post buscado= postRepo.findById(id).orElse(null);
-		if(p==null) {return ResponseEntity.notFound().build();}
+		if(p==null || buscado==null) {return ResponseEntity.notFound().build();}
 		else {
 			buscado.setNombre(p.getNombre());
 			buscado.setContenido(p.getContenido());
-			buscado.setCategorias(p.getCategorias());
+			buscado.setCategoria(catRepo.findById(p.getCategoria().getId()).orElse(null));
 			postRepo.save(buscado);
 			return ResponseEntity.ok().build();
 			
 		}
 	}
+	
+	public void salvaPosts(Long id) {
+		List<Post> todos=(List<Post>) postRepo.findAllByAutor(id);
+		if(!todos.isEmpty()) {
+			for (Post p : todos) {
+				p.setAutor(null);
+				postRepo.save(p);
+			}
+		}
+	}
 
 
 
+	// -- FILTROS -- //
+	
+	public ResponseEntity<?> getPostsFitrados(Long categoria,String titulo){
+		
+		List<Post> res=null;
+		if(categoria!=null) {
+			Categoria cat = catRepo.findById(categoria).orElse(null);
+			res=(List<Post>)postRepo.findAllByCategoria(cat);
+			return ResponseEntity.ok(res);
+			}
+		else if(titulo!=null){
+			 res=(List<Post>)postRepo.findAllByTitulo(titulo);
+			 System.out.println(titulo);
+			 System.out.println(res);
+			return ResponseEntity.ok(res);
+		}
+		else {return ResponseEntity.notFound().build();}
+		
+	}
 
 
 }

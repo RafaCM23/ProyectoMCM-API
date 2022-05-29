@@ -30,8 +30,8 @@ public class Post {
 	@OneToOne
 	private Profesional autor;
 	private String nombre;
-	@OneToMany(cascade = CascadeType.ALL)
-	private	List<Categoria> categorias;
+	@OneToOne(cascade = CascadeType.MERGE)
+	private	Categoria categoria;
 	@Column(length = 2000)
 	private String contenido;
 	private String imagen;

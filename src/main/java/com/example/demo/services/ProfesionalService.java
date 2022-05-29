@@ -13,11 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.model.Agenda;
+import com.example.demo.model.Post;
 import com.example.demo.model.Profesional;
 import com.example.demo.repository.AgendaRepo;
 import com.example.demo.repository.ProfesionalRepo;
@@ -30,6 +32,8 @@ public class ProfesionalService {
 	
 	@Autowired AgendaRepo agendaRepo;
 	@Autowired ProfesionalRepo profRepo;
+	
+	@Autowired BlogService blogService;
 	
     @Autowired private JWTUtil jwtUtil;
 	@Autowired private PasswordEncoder passwordEncoder;
@@ -94,6 +98,21 @@ public class ProfesionalService {
 		}
 		return res;
 	}
+    
+    public ResponseEntity<?> borraProfesional(Long id,String email){
+    	Profesional admin = profRepo.findByEmail(email).orElse(null);
+    	if(admin==null || !admin.getEmail().equals("administrador")) {
+    		return ResponseEntity.badRequest().body("Faltan Permisos");
+    	}
+    	Profesional buscado = profRepo.findById(id).orElse(null);
+    	if(buscado!=null) {
+    		blogService.salvaPosts(id);
+    		profRepo.delete(buscado);
+    		return ResponseEntity.noContent().build();
+    	}else {
+    		return ResponseEntity.notFound().build();
+    	}
+    }
     
     
     public int correoOcupado(String correo) {
@@ -168,7 +187,9 @@ public class ProfesionalService {
 					if(buscado.getVerificado()==false) {
 					resp=ResponseEntity.badRequest().body("Esta cuenta no esta verificada todavia");
 					}
-					else {resp=generaToken(prof.getEmail(),prof.getContrasenia());}
+					else {
+						System.out.println(prof.getEmail());
+						resp=generaToken(prof.getEmail(),prof.getContrasenia());}
 					 }
 				}
 			  }
