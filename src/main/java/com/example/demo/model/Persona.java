@@ -16,10 +16,9 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 public class Persona {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
 	
+	@Id
+	private int id;
 	private String nombre;
 	private String apellidos;
 	private String email;
