@@ -116,6 +116,10 @@ public class CorsConfig implements WebMvcConfigurer {
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
 				
+				registry.addMapping("/profesional")
+				.allowedOrigins(origen)
+				.allowedHeaders("*");
+				
 				registry.addMapping("/whois")
 				.allowedOrigins(origen)
 				.allowedHeaders("*");
