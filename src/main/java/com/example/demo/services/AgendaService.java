@@ -63,10 +63,9 @@ public class AgendaService {
 		Persona buscada = personaRepo.findByEmail(nueva.getEmail()).orElse(null);
 		if(buscada!=null && buscada.getNombre().equals(nueva.getNombre()) && buscada.getTlfn().equals(nueva.getTlfn())) {
 			nueva.setId(buscada.getId());
-			cita.setPersona(nueva);
-			personaRepo.save(nueva);
-			
+			cita.setPersona(nueva);			
 		}
+		personaRepo.save(nueva);
 		citaRepo.save(cita);
 
 		diaRepo.save(day);
