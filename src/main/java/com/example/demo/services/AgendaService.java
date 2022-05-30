@@ -64,6 +64,8 @@ public class AgendaService {
 		if(buscada!=null && buscada.getNombre().equals(nueva.getNombre()) && buscada.getTlfn().equals(nueva.getTlfn())) {
 			nueva.setId(buscada.getId());
 			cita.setPersona(nueva);
+			personaRepo.save(nueva);
+			
 		}
 		citaRepo.save(cita);
 
