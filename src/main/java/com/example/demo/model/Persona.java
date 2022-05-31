@@ -14,14 +14,17 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
 public class Persona {
 	
 	@Id
 	private int id;
+	private String email;
 	private String nombre;
 	private String apellidos;
-	private String email;
-	private String tlfn;
 
+	private String tlfn;
+	
+	public Persona() {
+		this.id=this.hashCode();
+	}
 }
