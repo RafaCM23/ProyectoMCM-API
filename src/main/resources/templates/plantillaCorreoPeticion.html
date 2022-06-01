@@ -1,0 +1,35 @@
+<!doctype hmtl>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimun-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie-edge">
+		<title>Correo automatico</title>
+	</head>
+	<body>
+		<div class="container m-0">
+			<div class="row contenido" style="background-color: rgb(255, 233, 233); color: black;">
+				<div class="col-12 titulo" style="margin-left: 4em;">
+					<h1>MCM Nutrición - <span style="color:rgb(0, 150, 130);">Cita Solicitada</span></h1>
+				</div>
+				<div class="col-12 cuerpo" style="text-align: center; padding: 0.5em;">
+					<p class="texto mt-4" style="font-size:1.3em;text-align: left;">
+					Desde <b><i>MCM Nutrición</i></b> le comunicamos que 
+					su cita el dia <b > <span th:text="${fecha}"></span> </b> con  <b> <span th:text="${profesional}"></span> </b>
+					ha sido realizada con éxito. Recuerde que ahora el profesional tiene que confirmar la cita,
+                    en cuyo caso, recibirá otro correo a esta misma dirección.
+                    Gracias por confiar en nosotros
+                    <br><br>
+                    <span style="color: rgb(0, 0, 77);">Si no pudiera asistir, por favor cancele la cita con al menos 1 dia de antelación para que otros pacientes puedan ocupar su hueco</span>
+					</p>
+					<a 	th:href="@{http://localhost:4200/cancelar/cita?id={id}(id=${idCancelar})}">
+					<button style="color: #fff;background-color: #fa733e;border-color: #fa733e;margin-left: auto;margin-right: auto;border-radius:10%;font-size: 1.4em;">
+					<i>Cancelar Cita</i>
+					</button>
+						
+					</a>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
