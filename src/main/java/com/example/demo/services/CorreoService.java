@@ -137,7 +137,7 @@ public class CorreoService {
 		//  -- Utilidades  --  //
 		
 		public String formatFecha(Date d,int hora) {
-			String fecha= (d.getDate()+"-"+(d.getMonth()+1)+"-"+(1900+d.getYear()));
+			String fecha= ((d.getDate()+1)+"-"+(d.getMonth()+1)+"-"+(1900+d.getYear()));
 			fecha+=" a las ";
 			switch (hora) {
 			case 4:
