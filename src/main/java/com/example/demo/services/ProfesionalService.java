@@ -270,12 +270,15 @@ public class ProfesionalService {
 		marta.setContrasenia(contraMarta);
 		Profesional ej1 = new Profesional("Ej1", "ejemplo1", "correo33@correo.com","tlfn");
 		Profesional ej2 = new Profesional("Ej2", "ejemplo2", "emai","tlfn");
+		ej1.setContrasenia(contraMarta); ej2.setContrasenia(contraMarta);
+		ej1.setVerificado(true); ej2.setVerificado(true);
 		agendaRepo.save(marta.getAgenda());agendaRepo.save(ej1.getAgenda());agendaRepo.save(ej2.getAgenda());
 		agendaRepo.save(new Agenda());
 		marta.setEspecialidad("Nutrición Materno-Infantil"); marta.setDescripcion("Además de interesarme la Nutrición infantil tengo experiencia en consultas tanto para personas\n"
 				+ "                que quieren disminuir su peso y mejorar su relación con la comida, como para intolerantes a la fructosa, lactosa o gluten");
 		ej1.setEspecialidad("Ej1 Especialidad"); ej1.setDescripcion("Ej1 Descripcion");
 		ej2.setEspecialidad("Ej2 Especialidad"); ej2.setDescripcion("Ej2 Descripcion");
+		
 		marta.setVerificado(true);admin.setVerificado(true);
 		profRepo.save(marta);profRepo.save(ej1);profRepo.save(ej2);profRepo.save(admin);
 	}

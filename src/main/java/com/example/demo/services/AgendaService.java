@@ -101,6 +101,16 @@ public class AgendaService {
 				day.setOcupado(true);
 				diaRepo.save(day);
 				mesRepo.save(month);
+				for (Cita c: day.getCitasConfirmadas()) {
+					correoService.sendMail(3, c, 1);
+					day.rechazaCita(c);
+					citaRepo.delete(c);
+				}
+				for (Cita c : day.getCitasSinConfirmar()) {
+					correoService.sendMail(3, c, 1);
+					day.rechazaCita(c);
+					citaRepo.delete(c);
+				}
 			}
 			return ResponseEntity.ok().build();
 		}
@@ -108,7 +118,7 @@ public class AgendaService {
 	
 	public ResponseEntity<?> vacacionesDia(Long id, int anio, int mes, int dia,Profesional p){
 		Profesional prof=profRepo.findById(id).orElse(null);
-		if(p==null || (!p.getEmail().equals("administrador") && prof.getId()!=p.getId())|| prof==null ) {
+		if(p==null || prof==null || (!p.getEmail().equals("administrador") && prof.getId()!=p.getId()) ) {
 			return ResponseEntity.badRequest().body("Datos Erroneos");
 		}
 		else {
@@ -127,10 +137,12 @@ public class AgendaService {
 				mesRepo.save(month);
 				for (Cita c: day.getCitasConfirmadas()) {
 					correoService.sendMail(3, c, 3);
+					day.rechazaCita(c);
 					citaRepo.delete(c);
 				}
 				for (Cita c : day.getCitasSinConfirmar()) {
 					correoService.sendMail(3, c, 3);
+					day.rechazaCita(c);
 					citaRepo.delete(c);
 				}
 			}
