@@ -151,9 +151,7 @@ public class MainController {
     @GetMapping("/whois")
     public ResponseEntity<?> whoIs(){
     	String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    	System.out.println(email);
     	Profesional resp= profService.getDatos(email);
-    	System.out.println(resp);
     	if(resp==null) {return ResponseEntity.notFound().build();}
     	else {return ResponseEntity.ok(resp.getId());}
     }
