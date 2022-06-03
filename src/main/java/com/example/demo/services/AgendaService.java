@@ -62,9 +62,18 @@ public class AgendaService {
 		Persona nueva = cita.getPersona();
 		Persona buscada = personaRepo.findByEmail(nueva.getEmail()).orElse(null);
 		
-		if(buscada!=null && buscada.getNombre().equals(nueva.getNombre()) && buscada.getTlfn().equals(nueva.getTlfn())) {
+		if(buscada!=null) {
+			buscada.anadeCita(cita);
 			cita.setPersona(buscada);
+			personaRepo.save(buscada);	
 		}
+		else {
+			nueva.anadeCita(cita);
+			cita.setPersona(nueva);
+			personaRepo.save(nueva);	
+		}
+		
+		
 		citaRepo.save(cita);
 
 		diaRepo.save(day);
@@ -118,7 +127,7 @@ public class AgendaService {
 	
 	public ResponseEntity<?> vacacionesDia(Long id, int anio, int mes, int dia,Profesional p){
 		Profesional prof=profRepo.findById(id).orElse(null);
-		if(p==null || prof==null || (!p.getEmail().equals("administrador") && prof.getId()!=p.getId()) ) {
+		if(p==null || (!p.getEmail().equals("administrador") && prof.getId()!=p.getId())|| prof==null ) {
 			return ResponseEntity.badRequest().body("Datos Erroneos");
 		}
 		else {

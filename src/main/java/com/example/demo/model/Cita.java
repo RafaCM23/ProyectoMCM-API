@@ -9,6 +9,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+
+import org.hibernate.annotations.Cascade;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -26,8 +29,7 @@ public class Cita {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@ManyToOne(cascade = CascadeType.PERSIST)
-	//@JsonIgnore
+	@ManyToOne(cascade = CascadeType.MERGE)
 	private Persona persona;
 	private String motivo;
 	private Date fecha;
