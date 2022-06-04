@@ -110,12 +110,15 @@ public class AgendaService {
 				day.setOcupado(true);
 				diaRepo.save(day);
 				mesRepo.save(month);
-				for (Cita c: day.getCitasConfirmadas()) {
+				List<Cita> conf=day.getCitasConfirmadas();
+				List<Cita> noConf=day.getCitasSinConfirmar();
+				for (Cita c: conf) {
 					correoService.sendMail(3, c, 1);
 					day.rechazaCita(c);
 					citaRepo.delete(c);
 				}
-				for (Cita c : day.getCitasSinConfirmar()) {
+
+				for (Cita c : noConf) {
 					correoService.sendMail(3, c, 1);
 					day.rechazaCita(c);
 					citaRepo.delete(c);
@@ -144,13 +147,16 @@ public class AgendaService {
 				day.setVacaciones(true);
 				diaRepo.save(day);
 				mesRepo.save(month);
-				for (Cita c: day.getCitasConfirmadas()) {
-					correoService.sendMail(3, c, 3);
+				List<Cita> conf=day.getCitasConfirmadas();
+				List<Cita> noConf=day.getCitasSinConfirmar();
+				for (Cita c: conf) {
+					correoService.sendMail(3, c, 1);
 					day.rechazaCita(c);
 					citaRepo.delete(c);
 				}
-				for (Cita c : day.getCitasSinConfirmar()) {
-					correoService.sendMail(3, c, 3);
+
+				for (Cita c : noConf) {
+					correoService.sendMail(3, c, 1);
 					day.rechazaCita(c);
 					citaRepo.delete(c);
 				}
