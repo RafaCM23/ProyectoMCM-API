@@ -150,13 +150,13 @@ public class AgendaService {
 				List<Cita> conf=day.getCitasConfirmadas();
 				List<Cita> noConf=day.getCitasSinConfirmar();
 				for (Cita c: conf) {
-					correoService.sendMail(3, c, 1);
+					correoService.sendMail(3, c, 3);
 					day.rechazaCita(c);
 					citaRepo.delete(c);
 				}
 
 				for (Cita c : noConf) {
-					correoService.sendMail(3, c, 1);
+					correoService.sendMail(3, c, 3);
 					day.rechazaCita(c);
 					citaRepo.delete(c);
 				}
