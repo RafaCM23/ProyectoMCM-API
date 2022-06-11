@@ -64,16 +64,15 @@ public class AgendaService {
 		if(buscada!=null) {
 			buscada.anadeCita(cita);
 			cita.setPersona(buscada);
+			citaRepo.save(cita);
 			personaRepo.save(buscada);	
 		}
 		else {
 			nueva.anadeCita(cita);
 			cita.setPersona(nueva);
-			personaRepo.save(nueva);	
+			personaRepo.save(nueva);
+			citaRepo.save(cita);
 		}
-		
-		
-		citaRepo.save(cita);
 
 		diaRepo.save(day);
 		if(!month.getDias().contains(day)) {
