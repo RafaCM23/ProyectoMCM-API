@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.model.Categoria;
-import com.example.demo.model.Comentario;
 import com.example.demo.model.ComentarioPost;
 import com.example.demo.model.Post;
 import com.example.demo.model.Profesional;
@@ -37,13 +33,11 @@ public class BlogService {
 	@Autowired ComentarioPostRepo comentarioPostRepo;
 	
 
-	
 
     public ResponseEntity<?> setImagen(Long id,String email,MultipartFile imagen){
     	if(imagen.isEmpty() || imagen==null) {
     		return ResponseEntity.badRequest().body("Falta imagen");
     	}
-    	System.out.println(email);
 		Profesional who = profRepo.findByEmail(email).orElse(null);
     	if(who==null) {return ResponseEntity.badRequest().body("Falta permisos");}
     	else {
@@ -297,8 +291,6 @@ public class BlogService {
 			}
 		else if(titulo!=null){
 			 res=(List<Post>)postRepo.findAllByTitulo(titulo);
-			 System.out.println(titulo);
-			 System.out.println(res);
 			return ResponseEntity.ok(res);
 		}
 		else {return ResponseEntity.notFound().build();}

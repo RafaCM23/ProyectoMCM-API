@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.demo.model.Anio;
-import com.example.demo.model.User;
 
 
 public interface AnioRepo extends JpaRepository<Anio,Long> {

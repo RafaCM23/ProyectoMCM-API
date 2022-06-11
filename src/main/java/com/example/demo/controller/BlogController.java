@@ -26,15 +26,22 @@ import com.example.demo.services.BlogService;
 @RestController
 public class BlogController {
 
+	
+	//- Este controlador se ocupa de todo lo relacionado con el blog y los posts -//
+	
 	@Autowired private BlogService blogService;
 
-    @PostMapping("/post")
-    public ResponseEntity<?> nuevoPost(@RequestBody Post p){
-    	String email=(String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    	ResponseEntity<?> resp =blogService.creaPost(p,email);
-    	return resp;
-    }
+	
     
+    /**
+     * Esta llamada recibe una página o un filtro (categoria / nombre). Según los inputs introducidos
+     * saca los posts que cumplen esas condiciones y los devuelve. 
+     * Si los inputs no coincide con ningun post devuelve notFound.
+     * @param page
+     * @param categoria
+     * @param titulo
+     * @return ResponseEntity<?>
+     */
     @GetMapping("/posts")
     public ResponseEntity<?> getAllPostsPag(@RequestParam(required=false) Integer page,@RequestParam(required=false) Long categoria,@RequestParam(required=false) String titulo){
     	ResponseEntity<?> resp =null;
@@ -43,84 +50,139 @@ public class BlogController {
     	else if(titulo!=null) {resp=blogService.getPostsFitrados(null,titulo);}
     	return resp;
     }
-    
-  
-   
-    
+       
+    /**
+     * Esta llamada recibe un id y devuelve el post con esa id. Si no lo encuentra devuevle notFound.
+     * @param idPost
+     * @return ResponseEntity<?>
+     */
     @GetMapping("/post/{id}")
     public ResponseEntity<?> getPost(@PathVariable Long id){
-    	ResponseEntity<?> resp =blogService.getPost(id);
-    	return resp;
+    	return blogService.getPost(id);
     }
     
-    //--Administracion Blog--//
-    
-    @DeleteMapping("/post/{id}")
-    public ResponseEntity<?> deletePost(@PathVariable Long id){
-    	String email=(String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    	ResponseEntity<?> resp =blogService.borraPost(id,email);
-    	return resp;
-    }
-    @PutMapping("/post/{id}")
-    public ResponseEntity<?> editaPost(@PathVariable Long id,@RequestBody Post p){
-    	String email=(String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    	ResponseEntity<?> resp =blogService.editaPost(id,email,p);
-    	return resp;
-    }
-    
-    @GetMapping("/allPosts")
-    public ResponseEntity<?> getAllPosts(){
-    	String email=(String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    	ResponseEntity<?> resp =blogService.getAllPosts(email);
-    	return resp;
-    }
-    
-    
-    
+    /**
+     * Esta llamada recibe un id de categoría y devuelve 4 posts relacionados al azar, si no hay devuelve notFound.
+     * @param idCat
+     * @return ResponseEntity<?>
+     */
     @GetMapping("/postRelacionados/{idCat}")
     public ResponseEntity<?> getRelacionados(@PathVariable Long idCat){
-    	ResponseEntity<?> resp =this.blogService.getRelacionados(idCat);
-    	return resp;
+    	return this.blogService.getRelacionados(idCat);
     }
     
+    /**
+     * Ests llamada devuelve 6 posts al azar. Si no hay ninguno devuelve notFound.
+     * @return ResponseEntity<?>
+     */
     @GetMapping("/blogPreview")
     public ResponseEntity<?> getBlogPreview(){
-    	ResponseEntity<?> resp =this.blogService.getBlogPreview();
-    	return resp;
+    	return this.blogService.getBlogPreview();
     }
     
     
-    
+    /**
+     * Esta llamada recibe una categoría, y si los datos son correctos la guarda.
+     * @param Categoria 
+     * @return ResponseEntity<?>
+     */
     @PostMapping("/categoria")
     public ResponseEntity<?> postCategoria(@RequestBody Categoria c){
     	String email=(String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    	ResponseEntity<?> resp=this.blogService.creaCategoria(c.getNombre(), email);
-    	return resp;
+    	return this.blogService.creaCategoria(c.getNombre(), email);
     }
     
+    /**
+     * Esta llamada devuelve todas las categorías existentes, si no hay ninguna devuelve notFound.
+     * @return ResponseEntity<?>
+     */
     @GetMapping("/categorias")
     public ResponseEntity<?> getCategorias(){
-    	ResponseEntity<?> resp=this.blogService.recuperaCategorias();
-    	return resp;
+    	return this.blogService.recuperaCategorias();
     }
     
+    /**
+	 * Esta llamada recibe un post, si esta correcto lo crea y lo asocia al profesional que ha hecho la llamada
+	 * Si el post no es correcto, o no encuentra el profesional devuelve error.
+	 * @param Post p
+	 * @return ResponseEntity<?>
+	 */
+    @PostMapping("/post")
+    public ResponseEntity<?> nuevoPost(@RequestBody Post p){
+    	String email=(String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	return blogService.creaPost(p,email);
+    }
+    
+    /**
+     * Esta llamada recibe una id de un post y un comentario. Si los datos son correctos el comentario es guardado
+     * dentro del post. Si no encuentra el post devuelve notFound.
+     * @param idPost
+     * @param ComentarioPost
+     * @return ResponseEntity<?>
+     */
     @PostMapping("/post/{id}/comentario")
     public ResponseEntity<?> postComentario(@PathVariable Long id,@RequestBody ComentarioPost comentario){
 
-    	ResponseEntity<?> resp=this.blogService.creaComentario(id, comentario);
-    	return resp;
+    	return this.blogService.creaComentario(id, comentario);
     }
     
+    /**
+     * Esta llamada recibe un id de un post y un id de comentario. Si encuentra el post y el comentario dentro, entonces lo borra.
+     * Si no encuentra alguno de los dos devuelve notFound.
+     * @param idPost
+     * @param idComent
+     * @return ResponseEntity<?>
+     */
     @DeleteMapping("/post/{idPost}/comentario/{idComent}")
     public ResponseEntity<?> deleteComentario(@PathVariable Long idPost,@PathVariable Long idComent){
     	String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    	ResponseEntity<?> resp=this.blogService.deleteComentario(idPost, idComent,email);
-    	return resp;
+    	return this.blogService.deleteComentario(idPost, idComent,email);
+    }
+    
+    //------------------------------------ Administracion Blog ------------------------------------//
+    
+    /**
+     * Esta llamada recibe un id de un post, si lo encuentra y quien hizo la llamada es el administrador, el post es borrado.
+     * @param idPost
+     * @return ResponseEntity<?>
+     */
+    @DeleteMapping("/post/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable Long id){
+    	String email=(String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	return blogService.borraPost(id,email);
+    }
+    
+    /**
+     * Esta llamada recibe un id de un post y nuevos datos para editarlo. Si encuentra el posts y quien hizo la llamada es
+     * el administrador, los datos del posts son editados.
+     * @param idPost
+     * @param Post
+     * @return ResponseEntity<?>
+     */
+    @PutMapping("/post/{id}")
+    public ResponseEntity<?> editaPost(@PathVariable Long id,@RequestBody Post p){
+    	String email=(String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	return blogService.editaPost(id,email,p);
+    }
+    
+    /**
+     * Esta llamada recupera todos los posts. Si no existe ninguno devuelde notFound.
+     * @return  ResponseEntity<?>
+     */
+    @GetMapping("/allPosts")
+    public ResponseEntity<?> getAllPosts(){
+    	String email=(String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    	return blogService.getAllPosts(email);
     }
     
     //------------------------------------ Utilidades ------------------------------------//
     
-    
+    /**
+     * Esta llamada recibe un id de un post y una imagen. Si la imagen es correcta y encuentra el post, se vincula la imagen con el post.
+     * @param imagen
+     * @param idPost
+     * @return  ResponseEntity<?>
+     */
     @PostMapping("/post/{id}/imagen")
     public ResponseEntity<?> subirImagenPost(@RequestBody(required=false) MultipartFile file,@PathVariable(required=false) Long id){
     	String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -128,10 +190,15 @@ public class BlogController {
     		return resp;
     	
     }
+    
+    /**
+     * Esta llamada recibe un id de un post, y si lo encuentra devuelve su imagen asociada.
+     * @param idPost
+     * @return Resource (.png)
+     */
     @GetMapping(value="/post/{id}/imagen",produces= {MediaType.APPLICATION_OCTET_STREAM_VALUE})
     public Resource getImagenPost(@PathVariable(required=false) Long id){
-    	Resource resp = blogService.getImgPost(id);
-        return resp;
+    	return blogService.getImgPost(id);
     }
     
 }

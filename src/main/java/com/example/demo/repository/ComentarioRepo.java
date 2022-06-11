@@ -11,7 +11,7 @@ import com.example.demo.model.Comentario;
 
 public interface ComentarioRepo extends JpaRepository<Comentario, Long> {
 	
-	
+		//Método para obtener un comentario por Hash
 		public Optional<Comentario> findByCodigo(int codigo);
 		
 		

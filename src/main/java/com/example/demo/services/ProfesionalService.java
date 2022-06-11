@@ -13,13 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.model.Agenda;
-import com.example.demo.model.Post;
 import com.example.demo.model.Profesional;
 import com.example.demo.repository.AgendaRepo;
 import com.example.demo.repository.ProfesionalRepo;
@@ -66,7 +64,6 @@ public class ProfesionalService {
 		    	}
 				
 			} catch (Exception e) {
-				System.out.println(e);
 				resp=ResponseEntity.badRequest().body("Error al procesar la imagen");
 				
 			}
@@ -100,10 +97,7 @@ public class ProfesionalService {
 	}
     
     public ResponseEntity<?> borraProfesional(Long id,String email){
-    	Profesional admin = profRepo.findByEmail(email).orElse(null);
-    	if(admin==null || !admin.getEmail().equals("administrador")) {
-    		return ResponseEntity.badRequest().body("Faltan Permisos");
-    	}
+    	if(email==null || !email.equals("administrador")) {return ResponseEntity.badRequest().body("Faltan permisos");}
     	Profesional buscado = profRepo.findById(id).orElse(null);
     	if(buscado!=null) {
     		blogService.salvaPosts(id);
@@ -124,6 +118,11 @@ public class ProfesionalService {
 		Profesional prof=profRepo.findById(id).orElse(null);
 		if(prof!=null) return prof;
 		return null;
+	}
+	
+	public Profesional getProfesionalByEmail(String mail) {
+		return profRepo.findByEmail(mail).orElse(null);
+	
 	}
 	
 	public List<Profesional> getProfesionales(){
@@ -155,11 +154,14 @@ public class ProfesionalService {
 	
 	
 	
-	public int newProfesional(Profesional prof) {
+	public ResponseEntity<?> newProfesional(Profesional prof) {
     	
     	if(prof==null || prof.getNombre()==null || prof.getApellidos()==null || prof.getContrasenia()==null ||
     			prof.getEmail()==null || prof.getTlfn()==null || prof.getEspecialidad()==null || prof.getDescripcion()==null) {
-    		return -1;
+    		return ResponseEntity.badRequest().body("Faltan datos");
+    	}
+    	else if(correoOcupado(prof.getEmail())==1) {
+    		return ResponseEntity.badRequest().body("Correo Ocupado");
     	}
     	else {
     		 String encodedPass = passwordEncoder.encode(prof.getContrasenia());
@@ -168,7 +170,7 @@ public class ProfesionalService {
     				prof.getEmail(),prof.getTlfn(),prof.getEspecialidad(),prof.getDescripcion());
     		agendaRepo.save(p.getAgenda());
     		profRepo.save(p);
-    		return 1;
+    		return ResponseEntity.ok(HttpStatus.CREATED);
     	}
 	}
 
@@ -188,7 +190,6 @@ public class ProfesionalService {
 					resp=ResponseEntity.badRequest().body("Esta cuenta no esta verificada todavia");
 					}
 					else {
-						System.out.println(prof.getEmail());
 						resp=generaToken(prof.getEmail(),prof.getContrasenia());}
 					 }
 				}
@@ -199,7 +200,7 @@ public class ProfesionalService {
 	
 	public ResponseEntity<?> generaToken(String email,String contra) {
 		try {
-          String token = jwtUtil.generateToken(email);          
+          String token = jwtUtil.generateToken(email);   
           return ResponseEntity.ok(Collections.singletonMap("jwt-token", token));
       }catch (AuthenticationException authExc){
           return ResponseEntity.badRequest().body("Error al procesar login");
@@ -209,42 +210,44 @@ public class ProfesionalService {
 	
 	
 	
-	public ResponseEntity<?> verificaProf(Long id){
+	public ResponseEntity<?> verificaProf(Long id,String email){
+		if(email==null || !email.equals("administrador")) {return ResponseEntity.badRequest().body("Faltan permisos");}
 		
 		Profesional buscado = profRepo.findById(id).orElse(null);
 		if(buscado==null) {return ResponseEntity.notFound().build();}
 		else {
 			//Si el que envia esto esta verificado
-			if(buscado.getVerificado()==true) return ResponseEntity.badRequest().body("El profesional ya ha sido verificado");
+			if(buscado.getVerificado()) return ResponseEntity.badRequest().body("El profesional ya ha sido verificado");
 			buscado.setVerificado(true);
 			profRepo.save(buscado);
 			return ResponseEntity.ok().build();
 		}
 	}
-	
-	public ResponseEntity<?> rechazaProf(Long id){
+	public ResponseEntity<?> getDatos(String email) {
 		
-		Profesional buscado = profRepo.findById(id).orElse(null);
-		if(buscado==null) {return ResponseEntity.notFound().build();}
-		else {
-			//Si el que envia esto esta verificado
-			
-			//Se borra el profesional
-			if(buscado.getVerificado()==true) return ResponseEntity.badRequest().body("El profesional ya ha sido verificado");
-			profRepo.delete(buscado);
-			return ResponseEntity.noContent().build();}
+		if(email.isEmpty() || email.equals("anonymousUser")) {return ResponseEntity.badRequest().body("Falta token");}
+		Profesional prof=profRepo.findByEmail(email).orElse(null);
+		if(prof==null) {return ResponseEntity.notFound().build();}
+		else {return ResponseEntity.ok(prof);}
+	}
+	
+	public ResponseEntity<?> getProfIdByEmail(String email) {
+		
+		Profesional prof=profRepo.findByEmail(email).orElse(null);
+		if(prof==null) {return ResponseEntity.notFound().build();}
+		else {return ResponseEntity.ok(prof.getId());}
 	}
 	
 	
 	
-	public Profesional getDatos(String email) {
-		return profRepo.findByEmail(email).orElse(null);
-	}
-	
-	
-	public ResponseEntity<?> putDatos(Profesional nuevo, Profesional guardado){
-		if(nuevo.getNombre().isEmpty() || nuevo.getApellidos().isEmpty() || nuevo.getEmail().isEmpty()
-				|| nuevo.getTlfn().isEmpty() || nuevo.getEspecialidad().isEmpty() || nuevo.getDescripcion().isEmpty()) {
+	public ResponseEntity<?> putDatosProfesional(Profesional nuevo, Long idBuscado,String who){
+		if(!who.equals("administrador")) {
+			return ResponseEntity.badRequest().body("Faltan permisos");
+		}
+		Profesional guardado = profRepo.findById(idBuscado).orElse(null);
+		
+		if(nuevo.getNombre()==null || nuevo.getApellidos()==null || nuevo.getEmail()==null
+				|| nuevo.getTlfn()==null || nuevo.getEspecialidad()==null || nuevo.getDescripcion()==null) {
 			return ResponseEntity.badRequest().body("Faltan Datos");
 		}
 		if(guardado==null) {return ResponseEntity.notFound().build();}
@@ -263,23 +266,23 @@ public class ProfesionalService {
 	
 	
 	public void initProfesionales() {
-		Profesional admin = new Profesional();String encodedPass = passwordEncoder.encode("rad3#La00tR5%$$a2");
+		Profesional admin = new Profesional();
+		String encodedPass = passwordEncoder.encode("rad3#La00tR5%$$a2");
 		admin.setEmail("administrador");admin.setContrasenia(encodedPass);
+		
 		Profesional marta = new Profesional("Marta", "Cuberos Mesa", "emai","tlfn");
 		marta.setEmail("marta@correo.es");String contraMarta = passwordEncoder.encode("contrasenia123");
 		marta.setContrasenia(contraMarta);
-		Profesional ej1 = new Profesional("Ej1", "ejemplo1", "correo33@correo.com","tlfn");
-		Profesional ej2 = new Profesional("Ej2", "ejemplo2", "emai","tlfn");
-		ej1.setContrasenia(contraMarta); ej2.setContrasenia(contraMarta);
-		ej1.setVerificado(true); ej2.setVerificado(true);
-		agendaRepo.save(marta.getAgenda());agendaRepo.save(ej1.getAgenda());agendaRepo.save(ej2.getAgenda());
-		agendaRepo.save(new Agenda());
-		marta.setEspecialidad("Nutrición Materno-Infantil"); marta.setDescripcion("Además de interesarme la Nutrición infantil tengo experiencia en consultas tanto para personas\n"
-				+ "                que quieren disminuir su peso y mejorar su relación con la comida, como para intolerantes a la fructosa, lactosa o gluten");
-		ej1.setEspecialidad("Ej1 Especialidad"); ej1.setDescripcion("Ej1 Descripcion");
-		ej2.setEspecialidad("Ej2 Especialidad"); ej2.setDescripcion("Ej2 Descripcion");
+
+		agendaRepo.save(marta.getAgenda());
+		marta.setEspecialidad("Nutrición Materno-Infantil"); 
+		marta.setDescripcion("Además de interesarme la Nutrición infantil tengo experiencia en consultas tanto para personas\n"
+		+ " que quieren disminuir su peso y mejorar su relación con la comida, como para intolerantes a la fructosa, lactosa o gluten");
+
+		marta.setVerificado(true); profRepo.save(marta);
+		admin.setVerificado(true); profRepo.save(admin);
 		
-		marta.setVerificado(true);admin.setVerificado(true);
-		profRepo.save(marta);profRepo.save(ej1);profRepo.save(ej2);profRepo.save(admin);
+		
+		
 	}
 }
