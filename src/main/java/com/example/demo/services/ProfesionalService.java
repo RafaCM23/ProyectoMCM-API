@@ -17,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.demo.model.Agenda;
 import com.example.demo.model.Profesional;
 import com.example.demo.repository.AgendaRepo;
 import com.example.demo.repository.ProfesionalRepo;
