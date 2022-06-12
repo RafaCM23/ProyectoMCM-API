@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import java.util.Date;
+import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -34,6 +35,22 @@ public class Cita {
 	private Long profId;
 	@JsonIgnore
 	private int cancelar;
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(cancelar, fecha, hora, motivo, persona, presencial, profId,new Date());
+	}
+	@Override
+	public boolean equals(Object obj) {
+		
+		Cita other = (Cita) obj;
+		return cancelar == other.cancelar && Objects.equals(fecha, other.fecha) && hora == other.hora
+				&& Objects.equals(motivo, other.motivo)
+				&& Objects.equals(presencial, other.presencial) && Objects.equals(profId, other.profId);
+	}
+	
+	
+	
 	
 }
 

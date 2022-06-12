@@ -25,7 +25,7 @@ public class Persona {
 	private String email;
 	private String nombre;
 	private String apellidos;
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.REMOVE)
 	@JsonIgnore
 	private List<Cita> citas;
 	private String tlfn;
