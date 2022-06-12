@@ -215,10 +215,6 @@ public class AgendaService {
 			agendaRepo.save(p.getAgenda());
 			profRepo.save(p);
 			return month;
-		
-		
-		
-		
 	}
 	
 	public ResponseEntity<?> getCitasProximasSinVerificar(String email){
