@@ -270,6 +270,7 @@ public class AgendaService {
 	}
 	
 	public ResponseEntity<?> cancelarCita(int hash){
+		System.out.println(hash);
 		Cita cita = citaRepo.findByCancelar(hash).orElse(null);
 		if(cita==null) {return ResponseEntity.notFound().build();}
 		else {
