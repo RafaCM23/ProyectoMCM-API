@@ -282,8 +282,18 @@ public class AgendaService {
 			day.rechazaCita(cita);
 			diaRepo.save(day);
 			correoService.sendMail(3, cita, 4);
-			citaRepo.delete(cita);
-			return ResponseEntity.noContent().build();
+			Long id = cita.getPersona().getId();
+			Persona p = personaRepo.findById(id).orElse(null);
+			if(p!=null) {
+				p.eliminaCita(cita);
+				personaRepo.save(p);
+				citaRepo.delete(cita);
+				return ResponseEntity.noContent().build();
+			}
+			else {
+				return ResponseEntity.notFound().build();
+			}
+			
 		}
 	}
 	

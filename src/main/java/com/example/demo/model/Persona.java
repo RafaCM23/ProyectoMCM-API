@@ -21,7 +21,7 @@ import lombok.ToString;
 public class Persona {
 
 	@Id
-	private int id;
+	private Long id;
 	private String email;
 	private String nombre;
 	private String apellidos;
@@ -31,7 +31,7 @@ public class Persona {
 	private String tlfn;
 	
 	public Persona() {
-		this.id=this.hashCode();
+		this.id=(long) this.hashCode();
 		this.citas=new ArrayList<Cita>();
 	}
 	
