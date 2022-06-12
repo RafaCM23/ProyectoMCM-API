@@ -19,7 +19,7 @@ public interface PostRepo extends JpaRepository<Post,Long>{
 	public Optional<Post> findByNombre(String nombre);
 	
 	//Método para obtener todos los posts por Categoria
-			public Collection<Post> findAllByCategoria(Categoria cat);
+	public Collection<Post> findAllByCategoria(Categoria cat);
 	
 
 	
