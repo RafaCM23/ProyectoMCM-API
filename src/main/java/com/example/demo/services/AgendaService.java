@@ -1,5 +1,6 @@
 package com.example.demo.services;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -108,22 +109,10 @@ public class AgendaService {
 				day.setOcupado(true);
 				diaRepo.save(day);
 				mesRepo.save(month);
-				List<Cita> conf=day.getCitasConfirmadas();
-				List<Cita> noConf=day.getCitasSinConfirmar();
-				for (Cita c: conf) {
-					correoService.sendMail(3, c, 1);
-					day.rechazaCita(c);
-					citaRepo.delete(c);
-				}
-
-				for (Cita c : noConf) {
-					correoService.sendMail(3, c, 1);
-					day.rechazaCita(c);
-					citaRepo.delete(c);
 				}
 			}
 			return ResponseEntity.ok().build();
-		}
+		
 	}
 	
 	public ResponseEntity<?> vacacionesDia(Long id, int anio, int mes, int dia,Profesional p){
@@ -145,16 +134,18 @@ public class AgendaService {
 				day.setVacaciones(true);
 				diaRepo.save(day);
 				mesRepo.save(month);
-				List<Cita> conf=day.getCitasConfirmadas();
-				List<Cita> noConf=day.getCitasSinConfirmar();
+				List<Cita> conf=new ArrayList<>(day.getCitasConfirmadas());
+				List<Cita> noConf= new ArrayList<>(day.getCitasSinConfirmar());
 				for (Cita c: conf) {
 					correoService.sendMail(3, c, 3);
+					c.getPersona().eliminaCita(c);
 					day.rechazaCita(c);
 					citaRepo.delete(c);
 				}
-
+				
 				for (Cita c : noConf) {
 					correoService.sendMail(3, c, 3);
+					c.getPersona().eliminaCita(c);
 					day.rechazaCita(c);
 					citaRepo.delete(c);
 				}
@@ -215,6 +206,10 @@ public class AgendaService {
 			agendaRepo.save(p.getAgenda());
 			profRepo.save(p);
 			return month;
+		
+		
+		
+		
 	}
 	
 	public ResponseEntity<?> getCitasProximasSinVerificar(String email){
@@ -269,8 +264,8 @@ public class AgendaService {
 		}
 	}
 	
+	
 	public ResponseEntity<?> cancelarCita(int hash){
-		System.out.println(hash);
 		Cita cita = citaRepo.findByCancelar(hash).orElse(null);
 		if(cita==null) {return ResponseEntity.notFound().build();}
 		else {

@@ -36,7 +36,9 @@ public class Persona {
 	}
 	
 	public void eliminaCita(Cita c) {
-		this.citas.remove(this.citas.indexOf(c));
+		if(this.citas.contains(c)) {
+			this.citas.remove(this.citas.indexOf(c));
+		}
 	}
 	
 	public void anadeCita(Cita c) {
