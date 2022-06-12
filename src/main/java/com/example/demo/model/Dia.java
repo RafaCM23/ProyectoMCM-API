@@ -22,15 +22,7 @@ import lombok.ToString;
 
 public class Dia {
 	
-	public Dia() {
-		this.citasConfirmadas=new ArrayList<Cita>();
-		this.citasSinConfirmar=new ArrayList<Cita>();
-	}
-	public Dia(int numero) {
-		this.citasConfirmadas=new ArrayList<Cita>();
-		this.citasSinConfirmar=new ArrayList<Cita>();
-		this.numero=numero;
-	}
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -46,7 +38,31 @@ public class Dia {
 	private Boolean ocupado;
 
 	
-	public void addCitaSinConfirmar(Cita cita) {
+	public Dia() {
+		this.citasConfirmadas=new ArrayList<Cita>();
+		this.citasSinConfirmar=new ArrayList<Cita>();
+		this.vacaciones=false;
+		this.ocupado=false;
+	}
+	public Dia(int numero) {
+		this.citasConfirmadas=new ArrayList<Cita>();
+		this.citasSinConfirmar=new ArrayList<Cita>();
+		this.numero=numero;
+		this.vacaciones=false;
+		this.ocupado=false;
+	}
+	
+	public void addCitaSinConfirmar(Cita cita) throws Exception {
+		for (Cita c : citasConfirmadas) {
+			if(c.getHora()==cita.getHora()) {
+				throw new Exception("Hora Ocupada");
+			}
+		}
+		for (Cita c : citasSinConfirmar) {
+			if(c.getHora()==cita.getHora()) {
+				throw new Exception("Hora Ocupada");
+			}
+		}
 		this.citasSinConfirmar.add(cita);
 	}
 	
@@ -64,6 +80,9 @@ public class Dia {
 			this.citasConfirmadas.remove(cita);
 		}
 	}
+	
+	
+	
 	
 	
 	

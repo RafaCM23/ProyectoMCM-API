@@ -54,10 +54,26 @@ public class AgendaService {
 		if(month==null) {month=new Mes(mes);}					Dia day =month.getDia(cita.getFecha().getDate());
 		if(day==null) {day= new Dia(cita.getFecha().getDate());}
 		
+		if(day.getOcupado() || day.getVacaciones()) {
+			return "No se pueden pedir citas en este dia";
+		}
 		cita.setProfId(prof.getId());
 		cita.setCancelar(cita.hashCode());
-
-		day.addCitaSinConfirmar(cita);
+		
+		int totales=day.getCitasConfirmadas().size()+day.getCitasSinConfirmar().size();
+		
+		if(totales<4) {
+			try {
+				day.addCitaSinConfirmar(cita);
+			} catch (Exception e) {
+				return e.getMessage();
+			}
+		}
+		else {
+			day.setOcupado(true);
+			diaRepo.save(day);
+			return "Dia lleno";
+		}
 		
 		Persona nueva = cita.getPersona();
 		Persona buscada = personaRepo.findByEmail(nueva.getEmail()).orElse(null);
