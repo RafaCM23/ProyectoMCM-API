@@ -31,8 +31,6 @@ public class BlogService {
 	@Autowired ProfesionalRepo profRepo;
 	@Autowired PostRepo postRepo;
 	@Autowired ComentarioPostRepo comentarioPostRepo;
-	
-
 
     public ResponseEntity<?> setImagen(Long id,String email,MultipartFile imagen){
     	if(imagen.isEmpty() || imagen==null) {
