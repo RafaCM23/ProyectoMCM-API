@@ -266,10 +266,11 @@ public class BlogService {
 	}
 	
 	public void salvaPosts(Long id) {
+		Profesional marta = profRepo.findByEmail("marta@correo.es").orElse(null);
 		List<Post> todos=(List<Post>) postRepo.findAllByAutor(id);
 		if(!todos.isEmpty()) {
 			for (Post p : todos) {
-				p.setAutor(null);
+				p.setAutor(marta);
 				postRepo.save(p);
 			}
 		}
