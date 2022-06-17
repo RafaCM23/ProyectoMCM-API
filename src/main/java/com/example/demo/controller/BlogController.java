@@ -186,8 +186,7 @@ public class BlogController {
     @PostMapping("/post/{id}/imagen")
     public ResponseEntity<?> subirImagenPost(@RequestBody(required=false) MultipartFile file,@PathVariable(required=false) Long id){
     	String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    		ResponseEntity<?> resp = blogService.setImagen(id,email, file);
-    		return resp;
+    		return  blogService.setImagen(id,email, file);
     	
     }
     

@@ -33,7 +33,7 @@ public class BlogService {
 	@Autowired ComentarioPostRepo comentarioPostRepo;
 
     public ResponseEntity<?> setImagen(Long id,String email,MultipartFile imagen){
-    	if(imagen.isEmpty() || imagen==null) {
+    	if(imagen.isEmpty()) {
     		return ResponseEntity.badRequest().body("Falta imagen");
     	}
 		Profesional who = profRepo.findByEmail(email).orElse(null);
@@ -179,7 +179,6 @@ public class BlogService {
 				return ResponseEntity.notFound().build();
 			}		
 			return ResponseEntity.ok(todas);
-		
 		}
 	
 	public ResponseEntity<?> getRelacionados(Long idCat){
@@ -189,7 +188,6 @@ public class BlogService {
 			return ResponseEntity.notFound().build();
 		}		
 		return ResponseEntity.ok(todos);
-	
 		}
 	
 	public ResponseEntity<?> getBlogPreview(){
@@ -209,7 +207,6 @@ public class BlogService {
 		if(comentario==null ||comentario.getAutor()==null || comentario.getContenido()==null) {
 			return ResponseEntity.badRequest().body("Faltan Datos");
 		}
-		
 		else {
 			for (ComentarioPost c : p.getComentarios()) {
 				if(c.getAutor().equals(comentario.getAutor())) {
@@ -240,13 +237,8 @@ public class BlogService {
 				comentarioPostRepo.delete(cp);
 				return ResponseEntity.noContent().build();
 			}
-			
 		}
-		
-		
-		
-			return ResponseEntity.ok().build();
-		
+		return ResponseEntity.ok().build();
 	}
 	
 
@@ -260,8 +252,7 @@ public class BlogService {
 			buscado.setContenido(p.getContenido());
 			buscado.setCategoria(catRepo.findById(p.getCategoria().getId()).orElse(null));
 			postRepo.save(buscado);
-			return ResponseEntity.ok().build();
-			
+			return ResponseEntity.ok(id);
 		}
 	}
 	
@@ -275,7 +266,6 @@ public class BlogService {
 			}
 		}
 	}
-
 
 
 	// -- FILTROS -- //
