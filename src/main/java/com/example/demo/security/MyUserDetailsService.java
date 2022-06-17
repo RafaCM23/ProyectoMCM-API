@@ -22,7 +22,7 @@ public class MyUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Profesional p = profRepo.findByEmail(email).orElse(null);
         if(p==null)
-            throw new UsernameNotFoundException("Could not findUser with email = " + email);
+            throw new UsernameNotFoundException("No se ha encontrado profesional con email = " + email);
       
         return new org.springframework.security.core.userdetails.User(
                 email,

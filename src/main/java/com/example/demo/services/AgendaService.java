@@ -3,6 +3,7 @@ package com.example.demo.services;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -108,11 +109,18 @@ public class AgendaService {
 	
 	public ResponseEntity<?> ocupaDia(Long id, int anio, int mes, int dia,Profesional p){
 		Profesional prof=profRepo.findById(id).orElse(null);
-		if(p==null || (!p.getEmail().equals("administrador") && prof.getId()!=p.getId())|| prof==null ) {
+		if(p==null || prof==null || (!Objects.equals(prof.getId(), p.getId()) && !p.getEmail().equals("administrador"))) {
 			return ResponseEntity.badRequest().body("Datos Erroneos");
 		}
 		else {
-			Mes month=prof.getAgenda().getAnio(anio).getMes(mes);
+			Anio year = prof.getAgenda().getAnio(anio);
+			if(year==null) {
+				return ResponseEntity.badRequest().body("Año no creado");
+			}
+			Mes month=year.getMes(mes);
+			if(month==null) {
+				return ResponseEntity.badRequest().body("Mes no creado");
+			}
 			Dia day= month.getDia(dia);
 			if(day==null) {
 				Dia nuevo = new Dia(dia);
@@ -122,6 +130,12 @@ public class AgendaService {
 				mesRepo.save(month);
 				}
 			else {
+				if(day.getVacaciones()) {
+					return ResponseEntity.badRequest().body("Dia Vacaciones");
+				}
+				if(day.getOcupado()) {
+					return ResponseEntity.badRequest().body("Ya esta ocupado");
+				}
 				day.setOcupado(true);
 				diaRepo.save(day);
 				mesRepo.save(month);
@@ -133,11 +147,18 @@ public class AgendaService {
 	
 	public ResponseEntity<?> vacacionesDia(Long id, int anio, int mes, int dia,Profesional p){
 		Profesional prof=profRepo.findById(id).orElse(null);
-		if(p==null || (!p.getEmail().equals("administrador") && prof.getId()!=p.getId())|| prof==null ) {
+		if(p==null || prof==null || (!Objects.equals(prof.getId(), p.getId()) && !p.getEmail().equals("administrador"))) {
 			return ResponseEntity.badRequest().body("Datos Erroneos");
 		}
 		else {
-			Mes month=prof.getAgenda().getAnio(anio).getMes(mes);
+			Anio year = prof.getAgenda().getAnio(anio);
+			if(year==null) {
+				return ResponseEntity.badRequest().body("Año no creado");
+			}
+			Mes month=year.getMes(mes);
+			if(month==null) {
+				return ResponseEntity.badRequest().body("Mes no creado");
+			}
 			Dia day= month.getDia(dia);
 			if(day==null) {
 				Dia nuevo = new Dia(dia);
@@ -147,6 +168,12 @@ public class AgendaService {
 				mesRepo.save(month);
 				}
 			else {
+				if(day.getOcupado()) {
+					return ResponseEntity.badRequest().body("Dia ocupado");
+				}
+				if(day.getVacaciones()) {
+					return ResponseEntity.badRequest().body("Ya es vacaciones");
+				}
 				day.setVacaciones(true);
 				diaRepo.save(day);
 				mesRepo.save(month);
@@ -170,6 +197,7 @@ public class AgendaService {
 			return ResponseEntity.ok().build();
 		}
 	}
+	
 	public Anio buscaAnio(Date fecha){
 		int anio = fecha.getYear()+1900; 	
 		return anioRepo.findByNumero(anio).orElse(null);
