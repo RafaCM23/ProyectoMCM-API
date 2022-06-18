@@ -27,7 +27,7 @@ public class JWTUtil {
                 .withSubject("Profesional")
                 .withClaim("email", email)
                 .withIssuedAt(Date.from(now))
-                .withExpiresAt(Date.from(now.plus(1, ChronoUnit.HOURS)))//Caducidad = 1 hora
+                .withExpiresAt(Date.from(now.plus(2, ChronoUnit.HOURS)))//Caducidad = 1 hora
                 .withIssuer("MCM")
                 .sign(Algorithm.HMAC256(secret));
     }
