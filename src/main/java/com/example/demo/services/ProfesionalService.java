@@ -51,9 +51,9 @@ public class ProfesionalService {
     		try {
 				byte[] bytesImg = imagen.getBytes();
 				Path rutaCompleta = Paths.get(rutaAbsoluta+"//"+imagen.getOriginalFilename());
-				Files.write(rutaCompleta, bytesImg);
 
 		    	if(buscado!=null) {
+		    		Files.write(rutaCompleta, bytesImg);
 		    		buscado.setImg(imagen.getOriginalFilename());
 		    		profRepo.save(buscado);
 		    		resp= ResponseEntity.ok(HttpStatus.CREATED);

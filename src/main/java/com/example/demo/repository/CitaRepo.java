@@ -15,7 +15,7 @@ public interface CitaRepo extends JpaRepository<Cita,Long>{
 	@Query(
 			  value = "SELECT * FROM cita c WHERE \n"
 			  		+ "(DATE_FORMAT(fecha, '%Y/%m/%d')<(DATE_FORMAT((DATE_ADD(CURDATE(), INTERVAL 2 WEEK)), '%Y/%m/%d')))\n"
-			  		+ "AND c.prof_id=1\n"
+			  		+ "AND c.prof_id= :id \n"
 			  		+ "AND c.id IN\n"
 			  		+ "(SELECT citas_sin_confirmar_id FROM dia_citas_sin_confirmar)", 
 			  nativeQuery = true)
@@ -27,7 +27,7 @@ public interface CitaRepo extends JpaRepository<Cita,Long>{
 	@Query(
 			  value = "SELECT * FROM cita c WHERE \n"
 			  		+ "(DATE_FORMAT(fecha, '%Y/%m/%d')<(DATE_FORMAT((DATE_ADD(CURDATE(), INTERVAL 2 WEEK)), '%Y/%m/%d')))\n"
-			  		+ "AND c.prof_id=1\n"
+			  		+ "AND c.prof_id= :id \n"
 			  		+ "AND c.id IN\n"
 			  		+ "(SELECT citas_confirmadas_id FROM dia_citas_confirmadas)", 
 			  nativeQuery = true)
